@@ -10,6 +10,7 @@
 #include <opencv2/videoio.hpp>
 
 #include "CompressiveTracker.h"
+#include "kcftracker.hpp"
 
 using namespace std;
 using namespace cv;
@@ -40,19 +41,24 @@ int main(int argc, char** argv)
 		cerr << "error: first frame is empty" << endl;
 		return -1;
 	}
-	imshow("image", frame);
+	//imshow("image", frame);
 
 	//setMouseCallback(window_name,OnMouse);
 	//char key_val = (char)waitKey(0); // infinitely
 	//destroyWindow("image");
 
 	Mat grayImg;
+	//Rect box(g_x1,g_y1,g_x2-g_x1,g_y2-g_y1);
 	Rect box(200,200,200,200);
 	CompressiveTracker ct;	// CT Tracker
-	KCFTracker kcf(true, false, true, false); // KCF Tracker
+	// Note: KCF Tracker
+	// KCFTracker tracker(HOG, FIXEDWINDOW, MULTISCALE, LAB);
+	//KCFTracker kcf(true, false, true, false);
+	//KCFTracker kcf(false, true, false, false); 
 
 	cvtColor(frame, grayImg, COLOR_BGR2GRAY);
 	ct.init(grayImg, box);
+	//kcf.init(box, frame);
 
 	namedWindow(window_name, WINDOW_AUTOSIZE);
 	while(1){
@@ -65,13 +71,14 @@ int main(int argc, char** argv)
 		std::chrono::time_point<std::chrono::system_clock> start;
 		start = std::chrono::system_clock::now();
 		cvtColor(frame, grayImg, COLOR_BGR2GRAY);
-		ct.processFrame(grayImg,box); // process frame;
+		ct.processFrame(grayImg, box); // process frame;
+		//Rect result = kcf.update(frame);
 		rectangle(frame, box, Scalar(200,0,0), 2);
 		//putText(frame,"Object",cvPoint(0,20),2,1,CV_RGB(25,200,25));
 		std::cout << "Process Time: " << std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now() - start).count() << " ms"<< endl;
 
 		imshow(window_name, frame);
-		char key_val = (char)waitKey(15);
+		char key_val = (char)waitKey(10);
 		if(27 == key_val) break;
 	}
 
