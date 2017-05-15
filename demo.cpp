@@ -78,7 +78,7 @@ int main(int argc, char** argv)
 		//cvtColor(frame, grayImg, COLOR_BGR2GRAY);
 		//ct.processFrame(grayImg, box); // process frame;
 		Rect result = kcf.update(frame);
-		rectangle(frame, box, Scalar(200,0,0), 2);
+		rectangle(frame, result, Scalar(200,0,0), 2);
 		//putText(frame,"Object",cvPoint(0,20),2,1,CV_RGB(25,200,25));
 		std::cout << "Process Time: " << std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now() - start).count() << " ms"<< endl;
 
