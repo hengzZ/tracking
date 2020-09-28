@@ -103,3 +103,52 @@ Integrated object detection and tracking
 
 ## 其他文章
 - 一文带你了解视觉目标跟踪 https://www.sohu.com/a/330699110_651893
+
+<br>
+
+# BlobTrack
+—— 基于检测的多目标快速跟踪
+
+``` C++
+#include <chrono>
+#include "BlobTrack.h"
+
+BlobTrack *track = new BlobTrack();
+std::vector<target_Blob> vExist_targets;
+
+
+//blobs.
+std::vector<target_Blob> currentFrameBlobs;
+std::chrono::time_point<std::chrono::system_clock> start2;
+start2 = std::chrono::system_clock::now();
+
+//获取检测的bbox结果（cv::Rect result），存入blob对象。
+target_Blob possibleBlob;
+cv::Point currentCenter;
+
+possibleBlob.currentBoundingRect = cv::Rect(result.x, result.y, result.width, result.height);
+currentCenter.x = (possibleBlob.currentBoundingRect.x + possibleBlob.currentBoundingRect.x + possibleBlob.currentBoundingRect.width) / 2;
+currentCenter.y = (possibleBlob.currentBoundingRect.y + possibleBlob.currentBoundingRect.y + possibleBlob.currentBoundingRect.height) / 2;
+possibleBlob.centerPositions.push_back(currentCenter);
+possibleBlob.dblCurrentDiagonalSize = sqrt(pow(possibleBlob.currentBoundingRect.width, 2) + pow(possibleBlob.currentBoundingRect.height, 2));
+possibleBlob.dblCurrentAspectRatio = (float)possibleBlob.currentBoundingRect.width / (float)possibleBlob.currentBoundingRect.height;
+possibleBlob.blnStillBeingTracked = true;
+possibleBlob.blnCurrentMatchFoundOrNewBlob = true;
+possibleBlob.intNumOfConsecutiveFramesWithoutAMatch = 0;
+
+currentFrameBlobs.push_back(possibleBlob);
+
+//track（所谓的多目标跟踪即ID关联）
+track->matchCurrentFrameBlobsToExistingBlobs(vExist_targets, currentFrameBlobs);
+std::cout << "BlobTrack Time: " << std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::system_clock::now() - start2).count() << " us" << endl;
+
+//Draw
+for (unsigned int i = 0; i < vExist_targets.size(); i++) {
+    putText(frame, std::to_string(i), vExist_targets[i].centerPositions.back(), 0, 1, Scalar(255, 255, 0));
+    rectangle(frame, vExist_targets[i].currentBoundingRect, Scalar(255, 255, 0), 2);
+}
+
+imshow(window_name, frame);
+char key_val = (char)waitKey(10);
+if (27 == key_val) break;
+```
